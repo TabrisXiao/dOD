@@ -9,6 +9,7 @@ class data_wrapper(object):
 	a base class for wrapper the samples into a generator feeding to nn for trainning
 	FUNC:
 		pop: (vritual) generate one sample
+		adjust: (vritual) adjust the data shape for trainning
 		generate: generate a batch of samples
 		show: current draw the sample by the matplotlib
 	"""
@@ -30,10 +31,10 @@ class data_wrapper(object):
 		data = []
 		sig = []
 		for i in range(size):
-			d, s = self.pop()
+			d, s = self.pop(self.fps)
 			data.append(d)
 			sig.append(s)
-		return np.array(data), np.array(sig)
+		return self.adjust(np.array(data)), self.adjust(np.array(sig))
 	
 	def update(self, i, data, fg, ax, ntrail):
 		label = 'Frame step: {0}/{1}'.format(i+1, ntrail*self.fps)
@@ -41,13 +42,14 @@ class data_wrapper(object):
 		ax.set_xlabel(label)
 		return fg, ax
 
+	
 	def show(self):
 		ntrails = int(40/self.fps);
 		if ntrails*self.fps < 40 : ntrails+=1
 		data = []
 		mask = []
 		for j in range(ntrails):
-			d, sig = self.pop()
+			d, sig = self.pop(self.fps)
 			for i in range(self.fps):
 				mask.append(sig[i])
 				data.append(d[i])
@@ -63,3 +65,28 @@ class data_wrapper(object):
 			plt.pause(2/self.fps/ntrails)
 		plt.show()
 			
+	def check(self, net):
+		ntrails = int(40/self.fps);
+		if ntrails*self.fps < 40 : ntrails+=1
+		fps = self.fps*ntrails
+		data, mask = self.pop(fps)
+		x = []
+		y = []
+		for i in range(fps-self.fps):
+			dd = self.adjust([data[i:i+self.fps]])
+			x.append(dd)
+			#pred = net.predict(dd)
+			#y.append(pred)
+
+		fig,(ax1,ax2) = plt.subplots(1,2, sharey=True)
+#		print(data[0].shape)
+		fg1 = ax1.imshow(data[self.fps])
+		fg2 = ax2.imshow(mask[self.fps])
+		ax1.set_title("data")
+		ax2.set_title("mask")
+		for i in range(1, fps-self.fps):
+			self.update(i+self.fps, data, fg1, ax1, ntrails)
+			self.update(i+self.fps, mask, fg2, ax2, ntrails)
+			plt.pause(2/self.fps/ntrails)
+		plt.show()
+

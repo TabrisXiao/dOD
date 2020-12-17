@@ -63,9 +63,13 @@ def signal_motion_sample(r,size, shift,ntime):
 class sample_v0(drp):
 	def __init__(self, name, px, py, crop, FPS, radius):
 		super(sample_v0, self).__init__( name, px,py,FPS)
-		self.crop = crop
+		self.crop = crop # shift the crop
 		self.r = radius
 
-	def pop(self):
-		return signal_motion_sample(self.r,[self.p_w, self.p_h], self.crop, self.fps)
+	def pop(self, fps):
+		return signal_motion_sample(self.r,[self.p_w, self.p_h], self.crop, fps)
 
+	def adjust(self,x):
+		x = np.swapaxes(x, 1, 2)
+		x = np.swapaxes(x, 2, 3)
+		return x

@@ -58,3 +58,9 @@ class mynet(object):
 		self.net = model
 		self.net.compile(loss="binary_crossentropy", optimizer = "Adam", metrics=['binary_crossentropy','binary_accuracy'])
 		return 
+
+	def predict(self, x):
+		return self.net.predict(x)
+
+
+
