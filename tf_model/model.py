@@ -5,7 +5,7 @@ from layers import *
 from collections import OrderedDict
 
 class mynet(object):
-	def __init__(self, input_shape, drop_rate,padding, control_bit = 2):
+	def __init__(self, input_shape, drop_rate,padding, dtype = 'float16',control_bit = 2):
 		"""
 		The input_shape = [widht, height, channels]
 		"""
@@ -23,10 +23,11 @@ class mynet(object):
 		self.net = None
 		self.nclass = 1
 		self.padding = padding
-
+		self.dtype = dtype
 		
 	def buildNet(self, verbose = False):
-		inputs = tf.keras.Input(shape = self.ishape, name="inputs", dtype=tf.float32)
+		tf.keras.backend.set_floatx(self.dtype)
+		inputs = tf.keras.Input(shape = self.ishape, name="inputs")
 		x = inputs
 		feature =0
 		for idepth in range(0, self.depth):
