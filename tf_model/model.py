@@ -19,6 +19,8 @@ class mynet(object):
 		self.ishape = input_shape
 		self.layers_downstream = {}
 		self.layers_upstream = {}
+		self.nodes_downstream = {}
+		self.nodes_upstream = {}
 		self.root_feature = 64
 		self.net = None
 		self.nclass = 1
@@ -27,7 +29,7 @@ class mynet(object):
 		
 	def buildNet(self, verbose = False):
 		tf.keras.backend.set_floatx(self.dtype)
-		inputs = tf.keras.Input(shape = self.ishape, name="inputs")
+		inputs = tf.keras.Input(shape = self.ishape, name="inputs", dtype=self.dtype)
 		x = inputs
 		feature =0
 		for idepth in range(0, self.depth):
@@ -56,11 +58,13 @@ class mynet(object):
 			
 		model = tf.keras.Model(inputs, output, name = "test")
 		self.net = model
-		self.net.compile(loss="binary_crossentropy", optimizer = "Adam", metrics=['binary_crossentropy','binary_accuracy'])
+		self.net.compile(loss="binary_crossentropy", optimizer = "Adam", metrics=['binary_crossentropy'])
 		return 
 
 	def predict(self, x):
 		return self.net.predict(x)
 
+	def save(slef, path):
+		return self.net.save(filepath=path)
 
 

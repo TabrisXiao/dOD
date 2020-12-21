@@ -75,8 +75,8 @@ class data_wrapper(object):
 		for i in range(fps-self.fps):
 			dd = self.adjust([data[i:i+self.fps]])
 			x.append(dd)
-			#pred = net.predict(dd)
-			#y.append(pred)
+			pred = net.predict(dd)
+			y.append(pred)
 
 		fig,(ax1,ax2) = plt.subplots(1,2, sharey=True)
 #		print(data[0].shape)
