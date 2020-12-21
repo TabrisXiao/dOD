@@ -34,8 +34,8 @@ class data_wrapper(object):
 			d, s = self.pop(self.fps)
 			data.append(d)
 			sig.append(s)
-		return self.adjust(np.array(data)), np.array(sig)
-		#return self.adjust(np.array(data)), self.adjust(np.array(sig))
+		#return self.adjust(np.array(data)), np.array(sig)
+		return self.adjust(np.array(data)), self.adjust(np.array(sig))
 	
 	def update(self, i, data, fg, ax, ntrail):
 		label = 'Frame step: {0}/{1}'.format(i+1, ntrail*self.fps)

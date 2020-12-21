@@ -75,7 +75,7 @@ class sample_v0(drp):
 			self.buff = signal_motion_sample(self.r,[self.p_w, self.p_h], self.crop, self.buff_size)
 			self.buff_ptr =fps
 		data = self.buff[0][self.buff_ptr-fps:self.buff_ptr]
-		mask = self.buff[1][self.buff_ptr-1]
+		mask = [self.buff[1][self.buff_ptr-1]]
 		self.buff_ptr+=1
 		return data, mask
 
