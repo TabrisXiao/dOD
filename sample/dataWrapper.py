@@ -34,7 +34,8 @@ class data_wrapper(object):
 			d, s = self.pop(self.fps)
 			data.append(d)
 			sig.append(s)
-		return self.adjust(np.array(data)), self.adjust(np.array(sig))
+		return self.adjust(np.array(data)), np.array(sig)
+		#return self.adjust(np.array(data)), self.adjust(np.array(sig))
 	
 	def update(self, i, data, fg, ax, ntrail):
 		label = 'Frame step: {0}/{1}'.format(i+1, ntrail*self.fps)
@@ -48,11 +49,14 @@ class data_wrapper(object):
 		if ntrails*self.fps < 40 : ntrails+=1
 		data = []
 		mask = []
-		for j in range(ntrails):
+		d, sig = self.pop(self.fps)
+		for i in range(self.fps):
+			data.append(d[i])
+			mask.append(sig) # the first fps-1 frames are still
+		for j in range((ntrails-1)*self.fps):
 			d, sig = self.pop(self.fps)
-			for i in range(self.fps):
-				mask.append(sig[i])
-				data.append(d[i])
+			data.append(d[self.fps-1])
+			mask.append(sig)
 		fig,(ax1,ax2) = plt.subplots(1,2, sharey=True)
 		print(data[0].shape)
 		fg1 = ax1.imshow(data[0])
@@ -65,28 +69,3 @@ class data_wrapper(object):
 			plt.pause(2/self.fps/ntrails)
 		plt.show()
 			
-	def check(self, net):
-		ntrails = int(40/self.fps);
-		if ntrails*self.fps < 40 : ntrails+=1
-		fps = self.fps*ntrails
-		data, mask = self.pop(fps)
-		x = []
-		y = []
-		for i in range(fps-self.fps):
-			dd = self.adjust([data[i:i+self.fps]])
-			x.append(dd)
-			pred = net.predict(dd)
-			y.append(pred)
-
-		fig,(ax1,ax2) = plt.subplots(1,2, sharey=True)
-#		print(data[0].shape)
-		fg1 = ax1.imshow(data[self.fps])
-		fg2 = ax2.imshow(mask[self.fps])
-		ax1.set_title("data")
-		ax2.set_title("mask")
-		for i in range(1, fps-self.fps):
-			self.update(i+self.fps, data, fg1, ax1, ntrails)
-			self.update(i+self.fps, mask, fg2, ax2, ntrails)
-			plt.pause(2/self.fps/ntrails)
-		plt.show()
-
