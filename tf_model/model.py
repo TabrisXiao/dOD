@@ -27,7 +27,7 @@ class mynet(object):
 		self.padding = padding
 		self.dtype = dtype
 		
-	def buildNet(self, verbose = False):
+	def buildNet(self, optimizer = 'Adam', verbose = False):
 		tf.keras.backend.set_floatx(self.dtype)
 		inputs = tf.keras.Input(shape = self.ishape, name="inputs", dtype=self.dtype)
 		x = inputs
@@ -58,7 +58,8 @@ class mynet(object):
 			
 		model = tf.keras.Model(inputs, output, name = "test")
 		self.net = model
-		self.net.compile(loss="binary_crossentropy", optimizer = "Adam", metrics=['binary_crossentropy'])
+		self.net.compile(loss="binary_crossentropy", optimizer = optimizer, metrics=['binary_crossentropy'])
+		#self.net.compile(loss="binary_crossentropy", optimizer = "Adam", metrics=['binary_crossentropy'])
 		return 
 
 	def predict(self, x):

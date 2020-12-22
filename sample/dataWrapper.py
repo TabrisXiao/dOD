@@ -52,13 +52,13 @@ class data_wrapper(object):
 		d, sig = self.pop(self.fps)
 		for i in range(self.fps):
 			data.append(d[i])
-			mask.append(sig) # the first fps-1 frames are still
+			mask.append(sig[0]) # the first fps-1 frames are still
 		for j in range((ntrails-1)*self.fps):
 			d, sig = self.pop(self.fps)
 			data.append(d[self.fps-1])
-			mask.append(sig)
+			mask.append(sig[0])
 		fig,(ax1,ax2) = plt.subplots(1,2, sharey=True)
-		print(data[0].shape)
+		print(len(mask))
 		fg1 = ax1.imshow(data[0])
 		fg2 = ax2.imshow(mask[0])
 		ax1.set_title("data")
@@ -68,4 +68,25 @@ class data_wrapper(object):
 			self.update(i, mask, fg2, ax2, ntrails)
 			plt.pause(2/self.fps/ntrails)
 		plt.show()
-			
+
+	def show_each_pop(self, ntrails):
+		if ntrails*self.fps < 40 : ntrails+=1
+		data = []
+		mask = []
+		for j in range(ntrails):
+			d, sig = self.pop(self.fps)
+			for i in range(self.fps):
+				data.append(d[i])
+				mask.append(sig[0]) # the first fps-1 frames are still
+		fig,(ax1,ax2) = plt.subplots(1,2, sharey=True)
+		print(len(mask))
+		fg1 = ax1.imshow(data[0])
+		fg2 = ax2.imshow(mask[0])
+		ax1.set_title("data")
+		ax2.set_title("mask")
+		for i in range(1, ntrails*self.fps):
+			self.update(i, data, fg1, ax1, ntrails)
+			self.update(i, mask, fg2, ax2, ntrails)
+			plt.pause(2/self.fps/ntrails)
+		plt.show()
+		
