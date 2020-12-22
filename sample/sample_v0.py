@@ -2,38 +2,38 @@
 import numpy as np
 from dataWrapper import data_wrapper as drp
 
-def bkg_sample(size):
-   return np.random.rand(size[0],size[1])
+def bkg_sample(size,dtype):
+   return np.random.rand(size[0],size[1]).astype(dtype)
 
-def signal_sample(r, size, start = [0,0]):
-    sig = np.zeros((size[0],size[1]))
-    width = size[0]
-    height = size[1]
-    x0=[0,0]
-    p_ul = [0,0]
-    p_dr = [0,0]
-    if start[0]-r>=0: p_ul[0]=start[0]-r
-    else : p_ul[0]=0
-    if start[1]-r>=0: p_ul[1]=start[1]-r
-    else : p_ul[1]=0
+def signal_sample(r, size,dtype, start = [0,0]):
+	sig = np.zeros((size[0],size[1]))
+	width = size[0]
+	height = size[1]
+	x0=[0,0]
+	p_ul = [0,0]
+	p_dr = [0,0]
+	if start[0]-r>=0: p_ul[0]=start[0]-r
+	else : p_ul[0]=0
+	if start[1]-r>=0: p_ul[1]=start[1]-r
+	else : p_ul[1]=0
+	
+	if start[0]+r>width-1 : p_dr[0]=width-1
+	else : p_dr[0]=start[0]+r
+	if start[1]+r>height-1: p_dr[1]=height-1
+	else : p_dr[1]=start[1]+r
+	
+	for i in range(p_ul[0],p_dr[0]+1):
+		for j in range(p_ul[1],p_dr[1]+1):
+			if pow(pow(x0[0]+i-start[0],2)+pow(x0[1]+j-start[1],2),0.5) > r: continue
+			sig[x0[0]+i,x0[1]+j] = 1 
+	return sig.astype(dtype)
 
-    if start[0]+r>width-1 : p_dr[0]=width-1
-    else : p_dr[0]=start[0]+r
-    if start[1]+r>height-1: p_dr[1]=height-1
-    else : p_dr[1]=start[1]+r
 
-    for i in range(p_ul[0],p_dr[0]+1):
-        for j in range(p_ul[1],p_dr[1]+1):
-            if pow(pow(x0[0]+i-start[0],2)+pow(x0[1]+j-start[1],2),0.5) > r: continue
-            sig[x0[0]+i,x0[1]+j] = 1
-            
-    return sig
-
-def signal_motion_sample(r,size, shift,ntime):
+def signal_motion_sample(r,size, shift,ntime, dtype):
     x = shift[0]+int(np.random.randint(size[0]-2*shift[0]-1))
     y = shift[1]+int(np.random.randint(size[1]-2*shift[1]-1))
 	
-    bkg = bkg_sample(size)
+    bkg = bkg_sample(size, dtype)
     makeSig = np.random.uniform(0,1)
     makeSig = 1
      
@@ -48,7 +48,7 @@ def signal_motion_sample(r,size, shift,ntime):
     for i in range(ntime):
         d0 = np.zeros((size[0],size[1]))
         if makeSig > 0.3:
-             d0 = signal_sample(r, size, [x,y])
+             d0 = signal_sample(r, size, dtype = dtype, start = [x,y])
         #sig.append(d0)
         data.append(np.add(d0,bkg))
         sig.append(d0[shift[0]:size[0]-shift[0], shift[1]:size[1]-shift[1]])
@@ -61,8 +61,8 @@ def signal_motion_sample(r,size, shift,ntime):
     return data, sig 
 
 class sample_v0(drp):
-	def __init__(self, name, px, py, crop, FPS, radius, buffSize = 24):
-		super(sample_v0, self).__init__( name, px,py,FPS)
+	def __init__(self, name, px, py, crop, FPS, radius, buffSize = 24, dtype = 'float32'):
+		super(sample_v0, self).__init__( name, px,py,dtype,FPS)
 		self.crop = crop # shift the crop
 		self.r = radius
 		self.buff_size= buffSize
@@ -72,7 +72,7 @@ class sample_v0(drp):
 	def pop(self, fps):
 		if fps > self.buff_size : self.buff_size = fps
 		if self.buff_ptr == self.buff_size: 
-			self.buff = signal_motion_sample(self.r,[self.p_w, self.p_h], self.crop, self.buff_size)
+			self.buff = signal_motion_sample(self.r,[self.p_w, self.p_h], self.crop, self.buff_size, self.dtype)
 			self.buff_ptr =fps
 		data = self.buff[0][self.buff_ptr-fps:self.buff_ptr]
 		mask = [self.buff[1][self.buff_ptr-1]]

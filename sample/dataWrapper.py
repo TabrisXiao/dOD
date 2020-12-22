@@ -13,7 +13,7 @@ class data_wrapper(object):
 		generate: generate a batch of samples
 		show: current draw the sample by the matplotlib
 	"""
-	def __init__(self,name, pixel_width, pixel_height, FPS=10):
+	def __init__(self,name, pixel_width, pixel_height, dtype, FPS=10):
 		"""
 		FPS (frames per sample): number of frames for each sample = pop()
 		"""
@@ -21,6 +21,8 @@ class data_wrapper(object):
 		self.p_w = pixel_width
 		self.p_h = pixel_height
 		self.fps = FPS
+		if dtype == 'float32': self.dtype = np.float32
+		elif dtype == 'float16': self.dtype = np.float16
 	
 	def generate(self, size):
 		""" 
@@ -57,16 +59,16 @@ class data_wrapper(object):
 			d, sig = self.pop(self.fps)
 			data.append(d[self.fps-1])
 			mask.append(sig[0])
-		fig,(ax1,ax2) = plt.subplots(1,2, sharey=True)
-		print(len(mask))
-		fg1 = ax1.imshow(data[0])
-		fg2 = ax2.imshow(mask[0])
+		fig,(ax1,ax2) = plt.subplots(ncols=2)
+		fg1 = ax1.imshow(data[0], interpolation='none')
+		fg2 = ax2.imshow(mask[0], interpolation='none')
 		ax1.set_title("data")
 		ax2.set_title("mask")
 		for i in range(1, ntrails*self.fps):
 			self.update(i, data, fg1, ax1, ntrails)
 			self.update(i, mask, fg2, ax2, ntrails)
 			plt.pause(2/self.fps/ntrails)
+			fig.canvas.draw()
 		plt.show()
 
 	def show_each_pop(self, ntrails):
@@ -78,7 +80,8 @@ class data_wrapper(object):
 			for i in range(self.fps):
 				data.append(d[i])
 				mask.append(sig[0]) # the first fps-1 frames are still
-		fig,(ax1,ax2) = plt.subplots(1,2, sharey=True)
+		fig,(ax1,ax2) = plt.subplots(1,2)
+		#fig,(ax1,ax2) = plt.subplots(1,2, sharey=True)
 		print(len(mask))
 		fg1 = ax1.imshow(data[0])
 		fg2 = ax2.imshow(mask[0])
@@ -90,3 +93,37 @@ class data_wrapper(object):
 			plt.pause(2/self.fps/ntrails)
 		plt.show()
 		
+	def check(self, net):
+		ntrails = int(40/self.fps);
+		if ntrails*self.fps < 40 : ntrails+=1
+		data = []
+		mask = []
+		predict = []
+		d, sig = self.pop(self.fps)
+		pre = net.predict(self.adjust([d]))
+		for i in range(self.fps):
+			data.append(d[i])
+			mask.append(sig[0]) # the first fps-1 frames are still
+			predict.append(pre[0,:,:,0]) # the first fps-1 frames are still
+		for j in range((ntrails-1)*self.fps):
+			d, sig = self.pop(self.fps)
+			data.append(d[self.fps-1])
+			pre = net.predict(self.adjust([d]))
+			mask.append(sig[0])
+			predict.append(pre[0,:,:,0]) 
+		fig,(ax1,ax2, ax3) = plt.subplots(1,3)
+		print(len(mask))
+		fg1 = ax1.imshow(data[0])
+		fg2 = ax2.imshow(mask[0])
+		fg3 = ax3.imshow(predict[0])
+		ax1.set_title("data")
+		ax2.set_title("mask")
+		ax3.set_title("predict")
+		for i in range(1, ntrails*self.fps):
+			self.update(i, data, fg1, ax1, ntrails)
+			self.update(i, mask, fg2, ax2, ntrails)
+			self.update(i, predict, fg3, ax3, ntrails)
+			plt.pause(2/self.fps/ntrails)
+			fig.canvas.draw()
+		plt.show()
+
