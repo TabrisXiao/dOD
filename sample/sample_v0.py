@@ -2,36 +2,8 @@
 import numpy as np
 from dataWrapper import data_wrapper as drp
 
-def randomPoint(size, shift= [0,0]):
-	x = shift[0]+int(np.random.randint(size[0]-2*shift[0]-1))
-	y = shift[1]+int(np.random.randint(size[1]-2*shift[1]-1))
-	return [x, y]
-
-
 def bkg_sample(size,dtype):
-	return np.random.rand(size[0],size[1]).astype(dtype)
-
-def bkg_sample_v1(size,dtype):
-	bkg = np.random.rand(size[0],size[1]).astype(dtype)
-	do_shape = np.random.uniform(0,1)
-	#if do_shape < 0.3: return bkg
-	rad = int(np.random.uniform(10,60))
-	val = np.random.uniform(0.5,3)
-	
-	start = randomPoint(size)
-	bound = []
-	bx = start[0] - rad
-	if bx < 0 : bx = 0	
-	by = start[1] - rad
-	if by < 0 : bx = 0	
-	for i in range(bx,bx+2*rad-1):
-		if i > size[0]-1 : continue
-		for j in range(by,by+2*rad-1):
-			if j > size[1]-1 : continue
-			bkg[i,j] = 1
-			#bkg[i,j] = val
-	return bkg.astype(dtype)
-	
+   return np.random.rand(size[0],size[1]).astype(dtype)
 
 def signal_sample(r, size,dtype, start = [0,0]):
 	sig = np.zeros((size[0],size[1]))
@@ -61,8 +33,8 @@ def signal_motion_sample(r,size, shift,ntime, dtype):
     x = shift[0]+int(np.random.randint(size[0]-2*shift[0]-1))
     y = shift[1]+int(np.random.randint(size[1]-2*shift[1]-1))
 	
-    bkg = bkg_sample_v1(size, dtype)
-    #bkg = bkg_sample(size, dtype)
+    bkg = bkg_sample(size, dtype)
+    makeSig = np.random.uniform(0,1)
     makeSig = 1
      
     vmax_x = size[0]//20
