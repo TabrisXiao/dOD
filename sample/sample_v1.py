@@ -48,14 +48,17 @@ def dice_draw_map():
 	if dice == 3 : dice = 0
 	return signal_map[dice]	
 	
-def bkg_sample_v1(size,dtype):
+def bkg_sample_v1(point, size,dtype):
+	"""
+	point is the [x,y] coordinate of the upper left shift point
+	"""
 	bkg = np.random.rand(size[0],size[1]).astype(dtype)
 	do_shape = np.random.uniform(0,1)
 	#if do_shape < 0.3: return bkg
 	rad = int(np.random.uniform(10,60))
 	val = np.random.uniform(0.6,6)
 	
-	start = randomPoint(size)
+	start = randomPoint(size, point)
 	sigF = dice_draw_map()
 	bkg = sigF(start, rad, bkg, val)
 	#bkg = draw_square(start, rad, bkg, val)
@@ -70,7 +73,7 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype):
 	x = shift[0]+int(np.random.randint(size[0]-2*shift[0]-1))
 	y = shift[1]+int(np.random.randint(size[1]-2*shift[1]-1))
 	
-	bkg = bkg_sample_v1(size, dtype)
+	bkg = bkg_sample_v1(shift, size, dtype)
 	#bkg = bkg_sample(size, dtype)
 	makeSig = 1
 	 

@@ -92,6 +92,11 @@ class data_wrapper(object):
 			self.update(i, mask, fg2, ax2, ntrails)
 			plt.pause(2/self.fps/ntrails)
 		plt.show()
+
+	def normalization(self, array):
+		m = np.amax(array)
+		if m != 0: array /=m
+		return array
 		
 	def check(self, net):
 		ntrails = int(40/self.fps);
@@ -99,30 +104,40 @@ class data_wrapper(object):
 		data = []
 		mask = []
 		predict = []
+		difference = []
 		d, sig = self.pop(self.fps)
-		pre = net.predict(self.adjust([d]))
+		pre = net.predict(self.adjust([d]))[0,:,:,0]
+		pre = self.normalization(pre)
+		diff = np.subtract(pre, sig[0])
 		for i in range(self.fps):
 			data.append(d[i])
 			mask.append(sig[0]) # the first fps-1 frames are still
-			predict.append(pre[0,:,:,0]) # the first fps-1 frames are still
+			predict.append(pre) # the first fps-1 frames are still
+			difference.append(diff) # the first fps-1 frames are still
 		for j in range((ntrails-1)*self.fps):
 			d, sig = self.pop(self.fps)
 			data.append(d[self.fps-1])
-			pre = net.predict(self.adjust([d]))
+			pre = net.predict(self.adjust([d]))[0,:,:,0]
+			pre = self.normalization(pre)
 			mask.append(sig[0])
-			predict.append(pre[0,:,:,0]) 
-		fig,(ax1,ax2, ax3) = plt.subplots(1,3)
+			predict.append(pre) 
+			diff = np.subtract(pre, sig[0])
+			difference.append(diff) 
+		fig,ax, = plt.subplots(1,4)
 		print(len(mask))
-		fg1 = ax1.imshow(data[0])
-		fg2 = ax2.imshow(mask[0])
-		fg3 = ax3.imshow(predict[0])
-		ax1.set_title("data")
-		ax2.set_title("mask")
-		ax3.set_title("predict")
+		fg1 = ax[0].imshow(data[0])
+		fg2 = ax[1].imshow(mask[0])
+		fg3 = ax[2].imshow(predict[0])
+		fg4 = ax[3].imshow(difference[0])
+		ax[0].set_title("data")
+		ax[1].set_title("mask")
+		ax[2].set_title("predict")
+		ax[3].set_title("difference")
 		for i in range(1, ntrails*self.fps):
-			self.update(i, data, fg1, ax1, ntrails)
-			self.update(i, mask, fg2, ax2, ntrails)
-			self.update(i, predict, fg3, ax3, ntrails)
+			self.update(i, data,       fg1, ax[0], ntrails)
+			self.update(i, mask,       fg2, ax[1], ntrails)
+			self.update(i, predict,    fg3, ax[2], ntrails)
+			self.update(i, difference, fg4, ax[3], ntrails)
 			plt.pause(2/self.fps/ntrails)
 			fig.canvas.draw()
 		plt.show()
