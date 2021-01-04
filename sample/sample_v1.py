@@ -48,20 +48,21 @@ def dice_draw_map():
 	if dice == 3 : dice = 0
 	return signal_map[dice]	
 	
-def bkg_sample_v1(point, size,dtype):
+def bkg_sample_v1(point, size,dtype, bkg_noise, bkg_obj):
 	"""
 	point is the [x,y] coordinate of the upper left shift point
 	"""
-	bkg = np.random.rand(size[0],size[1]).astype(dtype)
+	if bkg_noise: bkg = np.random.rand(size[0],size[1]).astype(dtype)
+	else: bkg = np.zeros((size[0],size[1])).astype(dtype)
 	do_shape = np.random.uniform(0,1)
 	#if do_shape < 0.3: return bkg
 	rad = int(np.random.uniform(10,60))
 	val = np.random.uniform(0.6,6)
 	
 	start = randomPoint(size, point)
-	sigF = dice_draw_map()
-	bkg = sigF(start, rad, bkg, val)
-	#bkg = draw_square(start, rad, bkg, val)
+	if bkg_obj:
+		sigF = dice_draw_map()
+		bkg = sigF(start, rad, bkg, val)
 	return bkg.astype(dtype)
 
 def signal_gen(point, r, size, sig_f, value, dtype): 
@@ -69,11 +70,11 @@ def signal_gen(point, r, size, sig_f, value, dtype):
 	sig_f(point, r, sig, value)
 	return sig.astype(dtype)
 
-def signal_motion_sample_v1(r,size, shift,ntime, dtype):
+def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj):
 	x = shift[0]+int(np.random.randint(size[0]-2*shift[0]-1))
 	y = shift[1]+int(np.random.randint(size[1]-2*shift[1]-1))
 	
-	bkg = bkg_sample_v1(shift, size, dtype)
+	bkg = bkg_sample_v1(shift, size, dtype, bkg_noise,bkg_obj)
 	#bkg = bkg_sample(size, dtype)
 	makeSig = 1
 	 
@@ -111,11 +112,13 @@ class sample_v1(drp):
 		self.buff_size= buffSize
 		self.buff_ptr = self.buff_size
 		self.buff =[]
+		self.bkg_noise = True
+		self.bkg_obj = True
 
 	def pop(self, fps):
 		if fps > self.buff_size : self.buff_size = fps
 		if self.buff_ptr == self.buff_size: 
-			self.buff = signal_motion_sample_v1(self.r,[self.p_w, self.p_h], self.crop, self.buff_size, self.dtype)
+			self.buff = signal_motion_sample_v1(self.r,[self.p_w, self.p_h], self.crop, self.buff_size, self.dtype, self.bkg_noise, self.bkg_obj)
 			self.buff_ptr =fps
 		data = self.buff[0][self.buff_ptr-fps:self.buff_ptr]
 		mask = [self.buff[1][self.buff_ptr-1]]
