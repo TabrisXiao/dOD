@@ -86,7 +86,7 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype):
 	boundary_x = [shift[0], size[0]-2*shift[0]-1]
 	boundary_y = [shift[1], size[1]-2*shift[1]-1]
 	sig_f = dice_draw_map()
-	val = np.random.uniform(0.6,6)
+	val = np.random.uniform(0.2,1)
 	for i in range(ntime):
 		d = np.zeros((size[0],size[1]))
 		d0 = np.zeros((size[0],size[1]))

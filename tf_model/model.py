@@ -7,7 +7,7 @@ from collections import OrderedDict
 class mynet(object):
 	def __init__(self, input_shape, drop_rate,padding, dtype = 'float16',control_bit = 2):
 		"""
-		The input_shape = [widht, height, channels]
+		The input_shape = [width, height, channels]
 		"""
 		
 		self.depth = 5
@@ -63,6 +63,9 @@ class mynet(object):
 		return 
 
 	def predict(self, x):
+		"""
+		x: the input data should be the shape [1, width, height, frames]
+		"""
 		return self.net.predict(x)
 
 	def save(slef, path):
