@@ -70,7 +70,7 @@ def signal_gen(point, r, size, sig_f, value, dtype):
 	sig_f(point, r, sig, value)
 	return sig.astype(dtype)
 
-def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj):
+def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj, reverseRate):
 	x = shift[0]+int(np.random.randint(size[0]-2*shift[0]-1))
 	y = shift[1]+int(np.random.randint(size[1]-2*shift[1]-1))
 	
@@ -78,7 +78,7 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj):
 	scale = np.random.uniform(1,4)
 	bkg = np.multiply(bkg,scale)
 	#bkg = bkg_sample(size, dtype)
-	reverseSig = np.random.uniform(0,1)
+	reverseDice = np.random.uniform(0,1)
 	 
 	vmax_x = size[0]//20
 	vmax_y = size[1]//20
@@ -91,7 +91,7 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj):
 	sig_f = dice_draw_map()
 	val = np.random.uniform(0.2,1)
 	for i in range(ntime):
-		if reverseSig > 0.7:
+		if reverseDice > reverseRate:
 			d = signal_gen([x,y], r, size, sig_f, -val, dtype)
 		else:
 			d = signal_gen([x,y], r, size, sig_f, val, dtype)
@@ -107,7 +107,7 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj):
 	return data, sig 
 
 class sample_v1(drp):
-	def __init__(self, name, px, py, crop, FPS, radius, buffSize = 24, dtype = 'float32'):
+	def __init__(self, name, px, py, crop, FPS, radius, buffSize = 24, reverseRate = 0., dtype = 'float32'):
 		super(sample_v1, self).__init__( name, px,py,dtype,FPS)
 		self.crop = crop # shift the crop
 		self.r = radius
@@ -116,11 +116,12 @@ class sample_v1(drp):
 		self.buff =[]
 		self.bkg_noise = True
 		self.bkg_obj = True
+		self.reverseRate = reverseRate
 
 	def pop(self, fps):
 		if fps > self.buff_size : self.buff_size = fps
 		if self.buff_ptr == self.buff_size: 
-			self.buff = signal_motion_sample_v1(self.r,[self.p_w, self.p_h], self.crop, self.buff_size, self.dtype, self.bkg_noise, self.bkg_obj)
+			self.buff = signal_motion_sample_v1(self.r,[self.p_w, self.p_h], self.crop, self.buff_size, self.dtype, self.bkg_noise, self.bkg_obj, self.reverseRate)
 			self.buff_ptr =fps
 		data = self.buff[0][self.buff_ptr-fps:self.buff_ptr]
 		mask = [self.buff[1][self.buff_ptr-1]]
