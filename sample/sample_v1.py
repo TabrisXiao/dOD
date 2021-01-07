@@ -75,8 +75,10 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj):
 	y = shift[1]+int(np.random.randint(size[1]-2*shift[1]-1))
 	
 	bkg = bkg_sample_v1(shift, size, dtype, bkg_noise,bkg_obj)
+	scale = np.random.uniform(1,4)
+	bkg = np.multiply(bkg,scale)
 	#bkg = bkg_sample(size, dtype)
-	makeSig = 1
+	reverseSig = np.random.uniform(0,1)
 	 
 	vmax_x = size[0]//20
 	vmax_y = size[1]//20
@@ -89,11 +91,11 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj):
 	sig_f = dice_draw_map()
 	val = np.random.uniform(0.2,1)
 	for i in range(ntime):
-		d = np.zeros((size[0],size[1]))
-		d0 = np.zeros((size[0],size[1]))
-		if makeSig > 0.3:
-		     d = signal_gen([x,y], r, size, sig_f, val, dtype)
-		     d0 = signal_gen([x,y], r, size, sig_f, 1, dtype)
+		if reverseSig > 0.7:
+			d = signal_gen([x,y], r, size, sig_f, -val, dtype)
+		else:
+			d = signal_gen([x,y], r, size, sig_f, val, dtype)
+		d0 = signal_gen([x,y], r, size, sig_f, 1, dtype)
 		data.append(np.add(d,bkg))
 		sig.append(d0[shift[0]:size[0]-shift[0], shift[1]:size[1]-shift[1]])
 		dx = int(np.random.randint(-vmax_x,vmax_x))

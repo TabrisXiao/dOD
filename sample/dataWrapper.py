@@ -99,8 +99,8 @@ class data_wrapper(object):
 		return array
 		
 	def check(self, net):
-		ntrails = int(40/self.fps);
-		if ntrails*self.fps < 40 : ntrails+=1
+		ntrails = int(42/self.fps);
+		if ntrails*self.fps < 42 : ntrails+=1
 		data = []
 		mask = []
 		predict = []
