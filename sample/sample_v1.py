@@ -75,7 +75,7 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj, reve
 	y = shift[1]+int(np.random.randint(size[1]-2*shift[1]-1))
 	
 	bkg = bkg_sample_v1(shift, size, dtype, bkg_noise,bkg_obj)
-	scale = np.random.uniform(1,4)
+	scale = np.random.uniform(1,3)
 	bkg = np.multiply(bkg,scale)
 	#bkg = bkg_sample(size, dtype)
 	reverseDice = np.random.uniform(0,1)
@@ -91,7 +91,7 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj, reve
 	sig_f = dice_draw_map()
 	val = np.random.uniform(0.2,1)
 	for i in range(ntime):
-		if reverseDice > reverseRate:
+		if reverseDice < reverseRate:
 			d = signal_gen([x,y], r, size, sig_f, -val, dtype)
 		else:
 			d = signal_gen([x,y], r, size, sig_f, val, dtype)
