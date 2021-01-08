@@ -70,12 +70,21 @@ def signal_gen(point, r, size, sig_f, value, dtype):
 	sig_f(point, r, sig, value)
 	return sig.astype(dtype)
 
-def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj, reverseRate):
+def signal_motion_sample_v1(r,size, shift,ntime, dtype, **kwargs):
+	reverseRate = 0
+	bkgScale = [0.9, 1.1]
+	keys = kwargs.keys()
+	if "bkgScale" in keys: bkgScale = kwargs["bkgScale"]
+	if "bkg_noise" in keys: bkg_noise = True
+	else : bkg_noise = False
+	if "bkg_obj" in kwargs.keys(): bkg_obj = True
+	else : bkg_obj = False
+	if "reverseRate" in kwargs.keys(): reverseRate = kwargs["reverseRate"]
 	x = shift[0]+int(np.random.randint(size[0]-2*shift[0]-1))
 	y = shift[1]+int(np.random.randint(size[1]-2*shift[1]-1))
 	
 	bkg = bkg_sample_v1(shift, size, dtype, bkg_noise,bkg_obj)
-	scale = np.random.uniform(1,3)
+	scale = np.random.uniform(bkgScale[0],bkgScale[1])
 	bkg = np.multiply(bkg,scale)
 	#bkg = bkg_sample(size, dtype)
 	reverseDice = np.random.uniform(0,1)
@@ -107,21 +116,22 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype, bkg_noise, bkg_obj, reve
 	return data, sig 
 
 class sample_v1(drp):
-	def __init__(self, name, px, py, crop, FPS, radius, buffSize = 24, reverseRate = 0., dtype = 'float32'):
+	def __init__(self, name, px, py, crop, FPS, radius, buffSize = 24, dtype = 'float32', **kwargs):
 		super(sample_v1, self).__init__( name, px,py,dtype,FPS)
 		self.crop = crop # shift the crop
 		self.r = radius
 		self.buff_size= buffSize
 		self.buff_ptr = self.buff_size
 		self.buff =[]
-		self.bkg_noise = True
-		self.bkg_obj = True
-		self.reverseRate = reverseRate
+		self.sg_control = kwargs
+#		self.bkg_noise = True
+#		self.bkg_obj = True
+#		self.reverseRate = reverseRate
 
 	def pop(self, fps):
 		if fps > self.buff_size : self.buff_size = fps
 		if self.buff_ptr == self.buff_size: 
-			self.buff = signal_motion_sample_v1(self.r,[self.p_w, self.p_h], self.crop, self.buff_size, self.dtype, self.bkg_noise, self.bkg_obj, self.reverseRate)
+			self.buff = signal_motion_sample_v1(self.r,[self.p_w, self.p_h], self.crop, self.buff_size, self.dtype, **self.sg_control)
 			self.buff_ptr =fps
 		data = self.buff[0][self.buff_ptr-fps:self.buff_ptr]
 		mask = [self.buff[1][self.buff_ptr-1]]
