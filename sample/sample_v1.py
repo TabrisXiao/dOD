@@ -131,7 +131,7 @@ class sample_v1(drp):
 	def pop(self, fps):
 		if fps > self.buff_size : self.buff_size = fps
 		if self.buff_ptr == self.buff_size: 
-			self.buff = signal_motion_sample_v1(self.r,[self.p_w, self.p_h], self.crop, self.buff_size, self.dtype, **self.sg_control)
+			self.buff = signal_motion_sample_v1(self.r,[self.p_w, self.p_h], self.crop, self.buff_size, self.dtype, **self.sg_contral)
 			self.buff_ptr =fps
 		data = self.buff[0][self.buff_ptr-fps:self.buff_ptr]
 		mask = [self.buff[1][self.buff_ptr-1]]
