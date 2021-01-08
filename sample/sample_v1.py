@@ -123,7 +123,7 @@ class sample_v1(drp):
 		self.buff_size= buffSize
 		self.buff_ptr = self.buff_size
 		self.buff =[]
-		self.sg_control = kwargs
+		self.sg_contral = kwargs
 #		self.bkg_noise = True
 #		self.bkg_obj = True
 #		self.reverseRate = reverseRate
