@@ -47,6 +47,7 @@ class data_wrapper(object):
 
 	
 	def show(self):
+		print("sample generator setting: ",self.sg_contral)
 		ntrails = int(40/self.fps);
 		if ntrails*self.fps < 40 : ntrails+=1
 		data = []
@@ -99,6 +100,7 @@ class data_wrapper(object):
 		return array
 		
 	def check(self, net):
+		print("sample generator setting: ",self.sg_contral)
 		ntrails = int(42/self.fps);
 		if ntrails*self.fps < 42 : ntrails+=1
 		data = []

@@ -76,9 +76,9 @@ def signal_gen(point, r, size, sig_f, value, dtype):
 def signal_motion_sample_v1(r,size, shift,ntime, dtype, **kwargs):
 	reverseRate = 0
 	keys = kwargs.keys()
-	if "bkg_noise" in keys: bkg_noise = True
+	if "bkg_noise" in keys: bkg_noise =kwargs["bkg_noise"]
 	else : bkg_noise = False
-	if "bkg_obj" in kwargs.keys(): bkg_obj = True
+	if "bkg_obj" in keys: bkg_obj = kwargs["bkg_obj"]
 	else : bkg_obj = False
 	if "reverseRate" in kwargs.keys(): reverseRate = kwargs["reverseRate"]
 	x = shift[0]+int(np.random.randint(size[0]-2*shift[0]-1))
@@ -88,6 +88,7 @@ def signal_motion_sample_v1(r,size, shift,ntime, dtype, **kwargs):
 	#bkg = bkg_sample(size, dtype)
 	reverseDice = np.random.uniform(0,1)
 	scale = np.random.uniform(0.2,1)
+	if "bkg_scale" in keys: scale = kwargs["bkg_scale"]
 	bkg = np.multiply(bkg,scale)
 	 
 	vmax_x = size[0]//20
@@ -124,9 +125,6 @@ class sample_v1(drp):
 		self.buff_ptr = self.buff_size
 		self.buff =[]
 		self.sg_contral = kwargs
-#		self.bkg_noise = True
-#		self.bkg_obj = True
-#		self.reverseRate = reverseRate
 
 	def pop(self, fps):
 		if fps > self.buff_size : self.buff_size = fps
